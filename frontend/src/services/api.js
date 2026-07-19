@@ -44,6 +44,12 @@ export async function getAdvisories(city = 'Delhi') {
   return r.json();
 }
 
+export async function getForecastAccuracy(city = 'Delhi') {
+  const r = await fetch(`${BASE}/forecast_accuracy?city_name=${city}`);
+  if (!r.ok) return null;
+  return r.json();
+}
+
 export async function askAgent7(question, city = 'Delhi') {
   const r = await fetch(`${BASE}/ask`, {
     method: 'POST',

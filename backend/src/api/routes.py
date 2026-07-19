@@ -230,6 +230,47 @@ def get_current_aqi(city_name: str = "Delhi", db: Session = Depends(get_db)):
     aqi_val, dom_pol = calculate_indian_aqi(reading.pm25, reading.pm10, reading.no2, reading.so2, co_mg_m3)
     return {"aqi": aqi_val, "dominant_pollutant": dom_pol}
 
+@router.get("/forecast_accuracy", response_model=Dict[str, Any])
+def get_forecast_accuracy(city_name: str = "Delhi", horizon: int = 24, db: Session = Depends(get_db)):
+    """Model RMSE vs. persistence baseline, evaluated on real backfilled history.
+    Cached in forecast_accuracy_log; re-computed at most once per hour per city."""
+    from src.db.models import Station, ForecastAccuracyLog
+    from src.ingestion.forecast_accuracy import evaluate_forecast_skill
+    from datetime import timedelta
+
+    city = db.query(City).filter_by(name=city_name).first()
+    if not city:
+        raise HTTPException(status_code=404, detail="City not found")
+
+    # Serve a cached result if we scored this city/horizon within the last hour
+    cached = db.query(ForecastAccuracyLog).filter_by(city_id=city.city_id, horizon_hours=horizon).order_by(ForecastAccuracyLog.date.desc()).first()
+    if cached and cached.date and (datetime.utcnow() - cached.date) < timedelta(hours=1):
+        rmse_m, rmse_p = cached.rmse_model, cached.rmse_persistence
+        imp = ((rmse_p - rmse_m) / rmse_p * 100.0) if rmse_p else 0.0
+        return {"city": city_name, "horizon_hours": horizon, "rmse_model": rmse_m,
+                "rmse_persistence": rmse_p, "improvement_pct": round(imp, 1),
+                "beats_baseline": rmse_m < rmse_p, "cached": True}
+
+    # Resolve coordinates from a station in the city (fallback to Delhi centre)
+    ward = db.query(Ward).filter_by(city_id=city.city_id).first()
+    station = db.query(Station).filter_by(ward_id=ward.ward_id).first() if ward else None
+    lat = station.lat if station and station.lat else 28.6139
+    lon = station.lon if station and station.lon else 77.2090
+
+    try:
+        result = evaluate_forecast_skill(lat, lon, horizon_hours=horizon)
+    except Exception as e:
+        raise HTTPException(status_code=503, detail=f"Could not evaluate forecast skill: {e}")
+
+    db.add(ForecastAccuracyLog(city_id=city.city_id, horizon_hours=horizon,
+                               date=datetime.utcnow(), rmse_model=result["rmse_model"],
+                               rmse_persistence=result["rmse_persistence"]))
+    db.commit()
+
+    result["city"] = city_name
+    result["cached"] = False
+    return result
+
 @router.get("/boundary", response_model=Dict[str, Any])
 def get_boundary(city_name: str = "Delhi", db: Session = Depends(get_db)):
     city = db.query(City).filter_by(name=city_name).first()
