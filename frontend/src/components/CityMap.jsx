@@ -29,7 +29,9 @@ export default function CityMap({ onWardSelect, selectedWard, mapCenter, cityNam
       mapInstance.current.setView(mapCenter, boundary ? 11 : 13);
       
       const aqi = currentAqi.aqi;
-      const resolvedColor = aqi <= 50 ? '#55A84F' : aqi <= 100 ? '#A3C853' : aqi <= 200 ? '#E8C830' : aqi <= 300 ? '#F29C33' : aqi <= 400 ? '#E93F33' : '#AF2D2D';
+      const noData = currentAqi.no_data || aqi == null;
+      const resolvedColor = noData ? '#9AA0A6'
+        : aqi <= 50 ? '#55A84F' : aqi <= 100 ? '#A3C853' : aqi <= 200 ? '#E8C830' : aqi <= 300 ? '#F29C33' : aqi <= 400 ? '#E93F33' : '#AF2D2D';
       
       if (polygonRef.current) {
         mapInstance.current.removeLayer(polygonRef.current);
@@ -58,13 +60,19 @@ export default function CityMap({ onWardSelect, selectedWard, mapCenter, cityNam
         }).addTo(mapInstance.current);
       }
       
-      polygonRef.current.bindTooltip(`<b>${cityName}</b><br>Live AQI: ${aqi} (${currentAqi.dominant_pollutant})`);
-      
+      const tip = noData
+        ? `<b>${cityName}</b><br>No live data available for this region`
+        : `<b>${cityName}</b><br>${currentAqi.stale ? 'Last known' : 'Live'} AQI: ${aqi} (${currentAqi.dominant_pollutant})`
+          + (currentAqi.stale && currentAqi.as_of ? `<br><i>as of ${new Date(currentAqi.as_of).toLocaleString('en-IN')}</i>` : '');
+      polygonRef.current.bindTooltip(tip);
+
       polygonRef.current.on('click', () => onWardSelect({
         id: 1,
         name: cityName,
         aqi: aqi,
-        dominant_pollutant: currentAqi.dominant_pollutant
+        dominant_pollutant: currentAqi.dominant_pollutant,
+        noData: noData,
+        stale: currentAqi.stale,
       }));
     }
   }, [mapCenter, cityName, currentAqi, boundary]);
