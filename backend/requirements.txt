@@ -1,0 +1,8 @@
+SQLAlchemy>=2.0
+alembic
+requests
+python-dotenv
+google-generativeai
+openai
+fastapi
+uvicorn

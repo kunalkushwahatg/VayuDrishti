@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html>
+<head>
+    
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+    <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap-glyphicons.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.2.0/css/all.min.css"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/python-visualization/folium/folium/templates/leaflet.awesome.rotate.min.css"/>
+    
+            <meta name="viewport" content="width=device-width,
+                initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+            <style>
+                #map_463eaa76d20137d110b9359117f81fa0 {
+                    position: relative;
+                    width: 100.0%;
+                    height: 100.0%;
+                    left: 0.0%;
+                    top: 0.0%;
+                }
+                .leaflet-container { font-size: 1rem; }
+            </style>
+
+            <style>html, body {
+                width: 100%;
+                height: 100%;
+                margin: 0;
+                padding: 0;
+            }
+            </style>
+
+            <style>#map {
+                position:absolute;
+                top:0;
+                bottom:0;
+                right:0;
+                left:0;
+                }
+            </style>
+
+            <script>
+                L_NO_TOUCH = false;
+                L_DISABLE_3D = false;
+            </script>
+
+        
+</head>
+<body>
+    
+    
+            <div class="folium-map" id="map_463eaa76d20137d110b9359117f81fa0" ></div>
+        
+</body>
+<script>
+    
+    
+            var map_463eaa76d20137d110b9359117f81fa0 = L.map(
+                "map_463eaa76d20137d110b9359117f81fa0",
+                {
+                    center: [23.12, 83.2],
+                    crs: L.CRS.EPSG3857,
+                    ...{
+  "zoom": 10,
+  "zoomControl": true,
+  "preferCanvas": false,
+}
+
+                }
+            );
+
+            
+
+        
+    
+            var tile_layer_42d20837df5b3e1423f0ebdb2764f1f8 = L.tileLayer(
+                "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+                {
+  "minZoom": 0,
+  "maxZoom": 19,
+  "maxNativeZoom": 19,
+  "noWrap": false,
+  "attribution": "\u0026copy; \u003ca href=\"https://www.openstreetmap.org/copyright\"\u003eOpenStreetMap\u003c/a\u003e contributors",
+  "subdomains": "abc",
+  "detectRetina": false,
+  "tms": false,
+  "opacity": 1,
+}
+
+            );
+        
+    
+            tile_layer_42d20837df5b3e1423f0ebdb2764f1f8.addTo(map_463eaa76d20137d110b9359117f81fa0);
+        
+    
+            var macro_element_1ad89189b93059f2cae89e3a3e9f05fe = L.tileLayer.wms(
+                "https://bhuvan-vec2.nrsc.gov.in/bhuvan/wms",
+                {"attribution": "\u003ca href=\"https://bhuvan.nrsc.gov.in\"\u003eGeoportal of ISRO - Bhuvan\u003c/a\u003e", "format": "image/png", "layers": "lulc:IND_LULC_50k_1112", "opacity": 0.7, "styles": "", "transparent": true, "version": "1.1.1"}
+            );
+        
+    
+            macro_element_1ad89189b93059f2cae89e3a3e9f05fe.addTo(map_463eaa76d20137d110b9359117f81fa0);
+        
+    
+            var tile_layer_91f10c1a7615eec213ec3661adaad83b = L.tileLayer(
+                "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+                {
+  "minZoom": 0,
+  "maxZoom": 18,
+  "maxNativeZoom": 18,
+  "noWrap": false,
+  "attribution": "OpenStreetMap",
+  "subdomains": "abc",
+  "detectRetina": false,
+  "tms": false,
+  "opacity": 1,
+}
+
+            );
+        
+    
+            tile_layer_91f10c1a7615eec213ec3661adaad83b.addTo(map_463eaa76d20137d110b9359117f81fa0);
+        
+    
+            var layer_control_bbb4cf59903deb0107209411f21678f8_layers = {
+                base_layers : {
+                    "openstreetmap" : tile_layer_42d20837df5b3e1423f0ebdb2764f1f8,
+                    "OSM (fallback base)" : tile_layer_91f10c1a7615eec213ec3661adaad83b,
+                },
+                overlays :  {
+                    "Bhuvan LULC 50k (2011-12)" : macro_element_1ad89189b93059f2cae89e3a3e9f05fe,
+                },
+            };
+            let layer_control_bbb4cf59903deb0107209411f21678f8 = L.control.layers(
+                layer_control_bbb4cf59903deb0107209411f21678f8_layers.base_layers,
+                layer_control_bbb4cf59903deb0107209411f21678f8_layers.overlays,
+                {
+  "position": "topright",
+  "collapsed": true,
+  "autoZIndex": true,
+}
+            ).addTo(map_463eaa76d20137d110b9359117f81fa0);
+
+        
+    
+            var marker_6bacbc4801e23d86d8499ee02b89ff5f = L.marker(
+                [23.12, 83.2],
+                {
+}
+            ).addTo(map_463eaa76d20137d110b9359117f81fa0);
+        
+    
+            var icon_ea5f55a128b0528fe014e850dbeb1605 = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "green",
+  "iconColor": "white",
+  "icon": "leaf",
+  "prefix": "glyphicon",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+        
+    
+        var popup_5c76f90c39a3d6541a938ff0e9ad318b = L.popup({
+  "maxWidth": "100%",
+});
+
+        
+            
+                var html_7d5341260aeab6ba833530ab254aae2d = $(`<div id="html_7d5341260aeab6ba833530ab254aae2d" style="width: 100.0%; height: 100.0%;">Ambikapur, Chhattisgarh</div>`)[0];
+                popup_5c76f90c39a3d6541a938ff0e9ad318b.setContent(html_7d5341260aeab6ba833530ab254aae2d);
+            
+        
+
+        marker_6bacbc4801e23d86d8499ee02b89ff5f.bindPopup(popup_5c76f90c39a3d6541a938ff0e9ad318b)
+        ;
+
+        
+    
+    
+                marker_6bacbc4801e23d86d8499ee02b89ff5f.setIcon(icon_ea5f55a128b0528fe014e850dbeb1605);
+            
+</script>
+</html>
