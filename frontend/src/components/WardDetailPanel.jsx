@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid } from 'recharts';
-import { getAttribution, getForecasts } from '../services/api';
+import { getAttribution, getForecasts, getForecastAccuracy } from '../services/api';
 import SkeletonCard from './SkeletonCard';
 import AqiChip from './AqiChip';
 
@@ -9,6 +9,7 @@ const PIE_COLORS = ['#F29C33', '#0F6E56', '#AF2D2D', '#E93F33', '#A3C853'];
 export default function WardDetailPanel({ ward, cityName, onClose }) {
   const [attr, setAttr] = useState(null);
   const [forecasts, setForecasts] = useState([]);
+  const [accuracy, setAccuracy] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -23,7 +24,10 @@ export default function WardDetailPanel({ ward, cityName, onClose }) {
       ]);
       setLoading(false);
     }).catch(() => setLoading(false));
-  }, [ward]);
+    // Forecast skill loads independently (backfills real history, can take a few seconds)
+    setAccuracy(null);
+    getForecastAccuracy(cityName).then(setAccuracy).catch(() => setAccuracy(null));
+  }, [ward, cityName]);
 
   const pieData = attr ? [
     { name: 'Vehicles', value: attr.vehicles },
@@ -109,6 +113,29 @@ export default function WardDetailPanel({ ward, cityName, onClose }) {
                 <Line type="monotone" dataKey="aqi" stroke="var(--accent)" strokeWidth={2} dot={{ r: 4, fill: 'var(--accent)' }} />
               </LineChart>
             </ResponsiveContainer>
+          )}
+
+          {/* Forecast skill vs. persistence baseline (real backfilled RMSE) */}
+          {accuracy && accuracy.rmse_model != null && (
+            <div style={{
+              marginTop: 10, paddingTop: 10, borderTop: '1px dashed var(--border)',
+              display: 'flex', alignItems: 'center', justifyContent: 'space-between'
+            }}>
+              <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
+                24h skill vs. persistence<br />
+                <span style={{ fontSize: '0.65rem' }}>
+                  RMSE {accuracy.rmse_model} vs {accuracy.rmse_persistence} · n={accuracy.samples}
+                </span>
+              </div>
+              <div style={{
+                fontSize: '0.85rem', fontWeight: 800,
+                color: accuracy.beats_baseline ? 'var(--aqi-good)' : 'var(--text-muted)',
+                background: accuracy.beats_baseline ? 'rgba(80,160,80,0.12)' : 'transparent',
+                padding: '3px 8px', borderRadius: 6, whiteSpace: 'nowrap'
+              }}>
+                {accuracy.beats_baseline ? `▼ ${accuracy.improvement_pct}% better` : 'baseline-level'}
+              </div>
+            </div>
           )}
         </div>
 

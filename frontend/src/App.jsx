@@ -195,7 +195,7 @@ export default function App() {
         flexShrink: 0,
       }}>
         <span>Real-time Air Quality Intelligence · {globalCity.name}</span>
-        <span>Data: CPCB Stations · Satellite · Weather Forecasts</span>
+        <span>Data: Open-Meteo Air Quality · NASA FIRMS Satellite · OpenStreetMap · Weather Forecasts</span>
         <span>VayuDrishti v1.0</span>
       </footer>
     </div>

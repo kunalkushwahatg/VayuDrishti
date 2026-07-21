@@ -188,47 +188,119 @@ def initialize_location(req: LocationRequest, db: Session = Depends(get_db)):
     ward_id = ward.ward_id
     
     # 2. Fetch Live Telemetry
+    telemetry = {"aqi_ok": False, "weather_ok": False, "error": "not attempted"}
     try:
-        fetch_live_telemetry(db, city, ward, req.lat, req.lon)
+        telemetry = fetch_live_telemetry(db, city, ward, req.lat, req.lon)
     except Exception as e:
+        telemetry = {"aqi_ok": False, "weather_ok": False, "error": str(e)}
         print(f"Telemetry failed: {e}")
-        
-    # 3. Run Agents Pipeline
-    try:
-        run_agent_1(ward_id)
-        run_agent_2(ward_id)
-        run_agent_3(ward_id)
-        run_agent_6(ward_id)
-        run_agent_5(ward_id)
-    except Exception as e:
-        print(f"Agent pipeline failed: {e}")
-        
-    return {"status": "success", "city": city.name, "ward_id": ward_id}
+
+    # 3. Run Agents Pipeline — only if we actually got fresh AQI data, so we
+    # don't regenerate attributions/advisories off stale numbers.
+    if telemetry.get("aqi_ok"):
+        try:
+            run_agent_1(ward_id)
+            run_agent_2(ward_id)
+            run_agent_3(ward_id)
+            run_agent_6(ward_id)
+            run_agent_5(ward_id)
+        except Exception as e:
+            print(f"Agent pipeline failed: {e}")
+    else:
+        print(f"Skipping agent pipeline for {city.name}: no fresh AQI data.")
+
+    return {
+        "status": "success" if telemetry.get("aqi_ok") else "no_live_data",
+        "city": city.name,
+        "ward_id": ward_id,
+        "live_data": telemetry.get("aqi_ok", False),
+        "detail": telemetry.get("error"),
+    }
+
+# A reading older than this is considered stale, not "live".
+AQI_FRESHNESS_HOURS = 3
 
 @router.get("/current_aqi", response_model=Dict[str, Any])
 def get_current_aqi(city_name: str = "Delhi", db: Session = Depends(get_db)):
     from src.ingestion.aqi_calculator import calculate_indian_aqi
     from src.db.models import Station, RawAQIReading
-    
+    from datetime import timedelta
+
+    def no_data(reason):
+        # Explicit "no data" instead of a fake 220 that looks like a real reading.
+        return {"aqi": None, "dominant_pollutant": None, "stale": True, "no_data": True, "reason": reason}
+
     city = db.query(City).filter_by(name=city_name).first()
     if not city:
-        return {"aqi": 220, "dominant_pollutant": "PM2.5"} # Fallback
-        
+        return no_data("city not found")
+
     ward = db.query(Ward).filter_by(city_id=city.city_id).first()
     if not ward:
-        return {"aqi": 220, "dominant_pollutant": "PM2.5"}
-        
+        return no_data("no ward")
+
     station = db.query(Station).filter_by(ward_id=ward.ward_id).first()
     if not station:
-        return {"aqi": 220, "dominant_pollutant": "PM2.5"}
-        
+        return no_data("no station")
+
     reading = db.query(RawAQIReading).filter_by(station_id=station.station_id).order_by(RawAQIReading.timestamp.desc()).first()
     if not reading:
-        return {"aqi": 220, "dominant_pollutant": "PM2.5"}
-        
+        return no_data("no readings")
+
     co_mg_m3 = reading.co / 1000.0 if reading.co else 0
     aqi_val, dom_pol = calculate_indian_aqi(reading.pm25, reading.pm10, reading.no2, reading.so2, co_mg_m3)
-    return {"aqi": aqi_val, "dominant_pollutant": dom_pol}
+
+    # Freshness guard: flag (don't hide) data older than the threshold so the UI
+    # can show "as of <time>" instead of presenting past data as live.
+    age = datetime.utcnow() - reading.timestamp if reading.timestamp else None
+    is_stale = age is not None and age > timedelta(hours=AQI_FRESHNESS_HOURS)
+    return {
+        "aqi": aqi_val,
+        "dominant_pollutant": dom_pol,
+        "as_of": reading.timestamp,
+        "stale": is_stale,
+        "no_data": False,
+    }
+
+@router.get("/forecast_accuracy", response_model=Dict[str, Any])
+def get_forecast_accuracy(city_name: str = "Delhi", horizon: int = 24, db: Session = Depends(get_db)):
+    """Model RMSE vs. persistence baseline, evaluated on real backfilled history.
+    Cached in forecast_accuracy_log; re-computed at most once per hour per city."""
+    from src.db.models import Station, ForecastAccuracyLog
+    from src.ingestion.forecast_accuracy import evaluate_forecast_skill
+    from datetime import timedelta
+
+    city = db.query(City).filter_by(name=city_name).first()
+    if not city:
+        raise HTTPException(status_code=404, detail="City not found")
+
+    # Serve a cached result if we scored this city/horizon within the last hour
+    cached = db.query(ForecastAccuracyLog).filter_by(city_id=city.city_id, horizon_hours=horizon).order_by(ForecastAccuracyLog.date.desc()).first()
+    if cached and cached.date and (datetime.utcnow() - cached.date) < timedelta(hours=1):
+        rmse_m, rmse_p = cached.rmse_model, cached.rmse_persistence
+        imp = ((rmse_p - rmse_m) / rmse_p * 100.0) if rmse_p else 0.0
+        return {"city": city_name, "horizon_hours": horizon, "rmse_model": rmse_m,
+                "rmse_persistence": rmse_p, "improvement_pct": round(imp, 1),
+                "beats_baseline": rmse_m < rmse_p, "cached": True}
+
+    # Resolve coordinates from a station in the city (fallback to Delhi centre)
+    ward = db.query(Ward).filter_by(city_id=city.city_id).first()
+    station = db.query(Station).filter_by(ward_id=ward.ward_id).first() if ward else None
+    lat = station.lat if station and station.lat else 28.6139
+    lon = station.lon if station and station.lon else 77.2090
+
+    try:
+        result = evaluate_forecast_skill(lat, lon, horizon_hours=horizon)
+    except Exception as e:
+        raise HTTPException(status_code=503, detail=f"Could not evaluate forecast skill: {e}")
+
+    db.add(ForecastAccuracyLog(city_id=city.city_id, horizon_hours=horizon,
+                               date=datetime.utcnow(), rmse_model=result["rmse_model"],
+                               rmse_persistence=result["rmse_persistence"]))
+    db.commit()
+
+    result["city"] = city_name
+    result["cached"] = False
+    return result
 
 @router.get("/boundary", response_model=Dict[str, Any])
 def get_boundary(city_name: str = "Delhi", db: Session = Depends(get_db)):

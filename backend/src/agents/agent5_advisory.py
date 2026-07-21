@@ -5,6 +5,25 @@ from src.db.session import SessionLocal
 from src.db.models import City, Ward, ForecastGrid, Advisory
 from src.llm.wrapper import get_llm
 
+# Maps a city to its dominant regional language for citizen advisories.
+# The PS explicitly asks for Bengaluru→Kannada, Chennai→Tamil, etc.
+CITY_LANGUAGE_MAP = {
+    "Bengaluru": "Kannada",
+    "Bangalore": "Kannada",
+    "Chennai": "Tamil",
+    "Mumbai": "Marathi",
+    "Kolkata": "Bengali",
+    "Hyderabad": "Telugu",
+    "Ahmedabad": "Gujarati",
+    "Pune": "Marathi",
+    "Delhi": "Hindi",
+    "New Delhi": "Hindi",
+}
+
+def get_regional_language(city_name: str) -> str:
+    """Returns the dominant regional language for a city, defaulting to Hindi."""
+    return CITY_LANGUAGE_MAP.get(city_name, "Hindi")
+
 def get_cpcb_tier(aqi: float):
     """Deterministic, rule-based mapping of AQI to health tier based on Indian CPCB standards."""
     if aqi <= 50:
@@ -69,16 +88,17 @@ def run_agent_5(ward_id: int):
     print(f"Categorized as Tier: {tier}")
     print(f"Official CPCB Template: '{base_template}'")
     
-    # 3. LLM Formatting & Translation
+    # 3. LLM Formatting & Translation — advisories go out in the city's regional language.
+    regional_lang = get_regional_language(city.name)
+    print(f"Regional language for {city.name}: {regional_lang}")
     channels = [
-        {"name": "push", "lang": "Hindi"},
-        {"name": "ivr", "lang": "English"},
-        {"name": "display", "lang": "English"}
+        {"name": "push", "lang": regional_lang},   # SMS/app push in the local language
+        {"name": "ivr", "lang": regional_lang},     # phone script for elderly, local language
+        {"name": "display", "lang": "English"}      # highway billboards kept in English
     ]
-    
+
     llm = get_llm(provider="groq")
-    ward = db.query(Ward).filter_by(city_id=delhi.city_id).first()
-    
+
     print("\nCalling Groq LLM API for Formatting/Translation...")
     
     for c in channels:

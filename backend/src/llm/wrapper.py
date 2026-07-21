@@ -57,7 +57,7 @@ def get_llm(provider="gemini", model_name=None) -> LLMWrapper:
         return OpenAICompatibleWrapper(
             base_url="https://api.groq.com/openai/v1",
             api_key=os.getenv("GROQ_API_KEY", "dummy_key"),
-            model_name=model_name or "llama-3.1-8b-instant"
+            model_name=model_name or "llama-3.3-70b-versatile"
         )
         
     elif provider == "openrouter":

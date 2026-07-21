@@ -3,7 +3,7 @@ import { getAdvisories } from '../services/api';
 import SkeletonCard from './SkeletonCard';
 
 const CHANNEL_ICONS = { push: '📱', ivr: '📞', display: '🖥️' };
-const CHANNEL_LABELS = { push: 'SMS (Hindi)', ivr: 'IVR Voice Script', display: 'Billboard Display' };
+const CHANNEL_LABELS = { push: 'SMS / App Push', ivr: 'IVR Voice Script', display: 'Billboard Display' };
 const CHANNEL_COLORS = { push: '#E8F3FF', ivr: '#F3E8FF', display: '#E8FFE8' };
 const CHANNEL_ACCENT = { push: '#2563EB', ivr: '#7C3AED', display: '#16A34A' };
 
