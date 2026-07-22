@@ -188,6 +188,15 @@ class QueryLog(Base):
     tools_called_json = Column(Text)
     timestamp = Column(DateTime, default=datetime.utcnow)
 
+class HeatmapCell(Base):
+    __tablename__ = "heatmap_cells"
+    id = Column(Integer, primary_key=True, index=True)
+    lat = Column(Float, index=True)
+    lon = Column(Float, index=True)
+    aqi = Column(Integer)
+    dominant = Column(String)
+    updated_at = Column(DateTime, index=True)
+
 class AuditLog(Base):
     __tablename__ = "audit_log"
     log_id = Column(Integer, primary_key=True, index=True)

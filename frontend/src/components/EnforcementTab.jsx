@@ -19,7 +19,6 @@ export default function EnforcementTab({ cityName, onLocate }) {
   if (loading) return <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>{[1,2,3].map(i => <SkeletonCard key={i} height={100} />)}</div>;
   if (!items.length) return (
     <div className="card" style={{ textAlign: 'center', padding: '2rem' }}>
-      <div style={{ fontSize: '2rem', marginBottom: 8 }}>✅</div>
       <h3>No pending enforcement items</h3>
       <p>All sites have been actioned today.</p>
     </div>
@@ -41,10 +40,10 @@ export default function EnforcementTab({ cityName, onLocate }) {
                 <span style={{ fontWeight: 700, fontSize: '0.95rem' }}>Site: {item.site_name}</span>
                 <span style={{
                   fontSize: '0.7rem', padding: '2px 8px', borderRadius: 99, fontWeight: 600,
-                  background: actioned[i] ? 'var(--accent-light)' : '#FFF3D4',
-                  color: actioned[i] ? 'var(--accent)' : '#B07A00'
+                  background: actioned[i] ? 'var(--accent-light)' : 'rgba(250,204,21,0.14)',
+                  color: actioned[i] ? 'var(--accent)' : 'var(--status-pending)'
                 }}>
-                  {actioned[i] ? 'Actioned ✓' : 'Pending'}
+                  {actioned[i] ? 'Actioned' : 'Pending'}
                 </span>
               </div>
               {(item.lat !== 0 && item.lon !== 0) && (

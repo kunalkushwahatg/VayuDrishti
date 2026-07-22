@@ -4,15 +4,13 @@ import CityMap from './components/CityMap';
 import WardDetailPanel from './components/WardDetailPanel';
 import EnforcementTab from './components/EnforcementTab';
 import AnomalyFeed from './components/AnomalyFeed';
-import AdvisoryView from './components/AdvisoryView';
 import AiChatPanel from './components/AiChatPanel';
 import LocationSearch from './components/LocationSearch';
 import { initializeLocation } from './services/api';
 
 const TABS = [
-  { id: 'enforcement', label: '🚨 Enforcement' },
-  { id: 'anomalies', label: '⚡ Anomalies' },
-  { id: 'advisories', label: '📢 Advisories' },
+  { id: 'enforcement', label: 'Inspections' },
+  { id: 'anomalies', label: 'Pollution Spikes' },
 ];
 
 export default function App() {
@@ -22,7 +20,10 @@ export default function App() {
   const [mapCenter, setMapCenter] = useState([28.6139, 77.2090]);
   const [focusMap, setFocusMap] = useState(null);
   const [loadingCity, setLoadingCity] = useState(false);
-  
+  // Right panel starts collapsed; the map/heatmap is the default full-width view.
+  // Clicking the expand rail opens the panel with the Inspection (Enforcement) tab.
+  const [panelCollapsed, setPanelCollapsed] = useState(true);
+
   const isAiOpen = activeTab === 'ask';
 
   const handleLocationSelect = async (loc) => {
@@ -74,20 +75,11 @@ export default function App() {
         
         <div style={{ flex: 1 }} />
 
-        {/* Status pills */}
+        {/* Status */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          {loadingCity ? (
+          {loadingCity && (
             <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Initializing Agents...</div>
-          ) : (
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.75rem' }}>
-              <div style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--aqi-good)', animation: 'pulse 2s infinite' }} />
-              <span style={{ color: 'var(--text-muted)', fontWeight: 500 }}>{globalCity.name} Live</span>
-            </div>
           )}
-          <div style={{ width: 1, height: 16, background: 'var(--border)' }} />
-          <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-            {new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
-          </span>
         </div>
       </header>
 
@@ -95,48 +87,51 @@ export default function App() {
       <div style={{ flex: 1, display: 'flex', overflow: 'hidden', position: 'relative' }}>
 
         {/* LEFT — Map */}
-        <div style={{ flex: '0 0 55%', position: 'relative', padding: '1rem 0 1rem 1rem' }}>
+        <div style={{ flex: panelCollapsed ? '1 1 100%' : '0 0 55%', position: 'relative', padding: '1rem 0 1rem 1rem', transition: 'flex-basis 0.3s ease' }}>
           <CityMap onWardSelect={setSelectedWard} selectedWard={selectedWard} mapCenter={mapCenter} cityName={globalCity.name} focusMap={focusMap} />
           {selectedWard && !isAiOpen && (
             <WardDetailPanel ward={selectedWard} cityName={globalCity.name} onClose={() => setSelectedWard(null)} />
           )}
         </div>
 
-        {/* RIGHT — Tabbed Panels */}
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', padding: '1rem', gap: '0.75rem', overflow: 'hidden' }}>
+        {/* RIGHT — Tabbed Panels (collapsible to the right) */}
+        {!panelCollapsed && (
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', padding: '1rem', gap: '0.75rem', overflow: 'hidden', minWidth: 0 }}>
 
-          {/* Tab switcher — only show non-AI tabs here; AI is triggered via FAB */}
-          {!isAiOpen && (
-            <div className="tab-group" style={{ flexShrink: 0 }}>
-              {TABS.map(t => (
-                <button key={t.id} className={`tab-btn ${activeTab === t.id ? 'active' : ''}`} onClick={() => setActiveTab(t.id)}>
-                  {t.label}
-                </button>
-              ))}
-            </div>
-          )}
-
-          {/* AI panel header when open */}
-          {isAiOpen && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
-              <button
-                className="btn btn-ghost"
-                style={{ padding: '4px 10px', fontSize: '0.8rem' }}
-                onClick={() => setActiveTab('enforcement')}
-              >
-                ← Back
-              </button>
-              <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-secondary)' }}>
-                VayuDrishti AI · Ask anything about air quality
-              </span>
-            </div>
-          )}
+          {/* Header row: tabs / AI header + collapse button */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
+            {!isAiOpen ? (
+              <div className="tab-group" style={{ flex: 1, minWidth: 0 }}>
+                {TABS.map(t => (
+                  <button key={t.id} className={`tab-btn ${activeTab === t.id ? 'active' : ''}`} onClick={() => setActiveTab(t.id)}>
+                    {t.label}
+                  </button>
+                ))}
+              </div>
+            ) : (
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1, minWidth: 0 }}>
+                <button className="btn btn-ghost" style={{ padding: '4px 10px', fontSize: '0.8rem' }} onClick={() => setActiveTab('enforcement')}>← Back</button>
+                <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-secondary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  VayuDrishti AI · Ask anything
+                </span>
+              </div>
+            )}
+            <button
+              onClick={() => setPanelCollapsed(true)}
+              title="Collapse panel"
+              style={{
+                flexShrink: 0, width: 30, height: 30, borderRadius: 8,
+                border: '1px solid var(--border)', background: 'var(--surface)',
+                color: 'var(--text-secondary)', cursor: 'pointer', fontSize: '0.95rem',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+              }}
+            >»</button>
+          </div>
 
           {/* Tab content */}
           <div style={{ flex: 1, overflow: isAiOpen ? 'hidden' : 'auto', display: 'flex', flexDirection: 'column' }}>
             {activeTab === 'enforcement' && <EnforcementTab cityName={globalCity.name} onLocate={(lat, lon) => setFocusMap({lat, lon, zoom: 16})} />}
             {activeTab === 'anomalies' && <AnomalyFeed cityName={globalCity.name} />}
-            {activeTab === 'advisories' && <AdvisoryView cityName={globalCity.name} />}
             {activeTab === 'ask' && (
               <div style={{
                 flex: 1, background: 'var(--surface)', borderRadius: 'var(--radius-md)',
@@ -147,11 +142,32 @@ export default function App() {
             )}
           </div>
         </div>
+        )}
+
+        {/* Collapsed rail — click to expand the panel back out */}
+        {panelCollapsed && (
+          <button
+            onClick={() => setPanelCollapsed(false)}
+            title="Expand panel"
+            style={{
+              flexShrink: 0, alignSelf: 'stretch', width: 40, margin: '1rem 1rem 1rem 0',
+              borderRadius: 'var(--radius-md)', border: '1px solid var(--border)',
+              background: 'var(--surface)', color: 'var(--text-secondary)', cursor: 'pointer',
+              display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 12,
+              fontFamily: 'inherit', fontSize: '0.75rem', fontWeight: 600,
+            }}
+          >
+            <span style={{ fontSize: '1rem' }}>«</span>
+            <span style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)', letterSpacing: '0.08em' }}>
+              {activeTab === 'anomalies' ? 'Pollution Spikes' : 'Inspections'}
+            </span>
+          </button>
+        )}
 
         {/* ===== FLOATING ASK AI BUTTON ===== */}
         {!isAiOpen && (
           <button
-            onClick={() => setActiveTab('ask')}
+            onClick={() => { setPanelCollapsed(false); setActiveTab('ask'); }}
             style={{
               position: 'absolute',
               bottom: 24,

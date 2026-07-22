@@ -14,7 +14,6 @@ export default function AnomalyFeed({ cityName }) {
   if (loading) return <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>{[1,2].map(i => <SkeletonCard key={i} height={140} />)}</div>;
   if (!anomalies.length) return (
     <div className="card" style={{ textAlign: 'center', padding: '2rem' }}>
-      <div style={{ fontSize: '2rem', marginBottom: 8 }}>🌿</div>
       <h3>All clear</h3>
       <p>No unusual pollution spikes detected in the last 24 hours.</p>
     </div>

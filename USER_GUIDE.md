@@ -9,6 +9,8 @@ This guide will help you set up and run the VayuDrishti application locally. The
 - **Forecast accuracy metric** — the app now measures its 24h AQI forecast RMSE against a persistence baseline on real backfilled history and shows the result in the ward panel (Delhi beats the baseline by ~6%). Endpoint: `GET /api/forecast_accuracy`.
 - **Upgraded LLM** — now uses Groq's `llama-3.3-70b-versatile` for higher-quality justifications and reports.
 - **Bug fixes** — fixed an advisory-pipeline crash for newly-searched cities and a hardcoded language label in the advisories panel.
+- **India AQI heatmap** — 🔥 toggle on the map shows a value-accurate AQI field. Optionally uses **Google Air Quality heatmap tiles** when `GOOGLE_MAPS_API_KEY` is set (global coverage, no grid-building), falling back to a free Open-Meteo grid otherwise.
+- **Command-center dark UI** and real city boundaries (no more square boxes).
 
 
 ## Prerequisites
@@ -63,6 +65,23 @@ GROQ_API_KEY=your_groq_api_key_here
 # Without it, Agent 6 still works and reports "no active fires detected".
 # Get a free key at https://firms.modaps.eosdis.nasa.gov/api/area/
 FIRMS_MAP_KEY=your_firms_map_key_here
+
+# OPTIONAL — Google Maps Platform Air Quality API. When set, the map's heatmap
+# uses Google's pre-rendered global AQI tiles (instead of our Open-Meteo grid),
+# and enables Google current/forecast data (incl. India CPCB AQI). Needs a
+# billing-enabled Google Cloud key. Without it, the app uses the free grid heatmap.
+# https://developers.google.com/maps/documentation/air-quality
+GOOGLE_MAPS_API_KEY=your_google_maps_key_here
+# Optional heatmap tile style (default UAQI_INDIGO_PERSIAN; try IND_CPCB for India)
+GOOGLE_AQ_MAPTYPE=UAQI_INDIGO_PERSIAN
+
+# OPTIONAL — Geoapify Boundaries API for high-quality city outline polygons.
+# When set, it's the preferred source for city boundaries; otherwise the app
+# falls back to OpenStreetMap/Nominatim admin boundaries. Free tier: 100k req.
+# Get a free key at https://www.geoapify.com/ (MyProjects)
+GEOAPIFY_API_KEY=your_geoapify_key_here
+# Optional geometry detail (geometry_1000 = balanced; try geometry_5000 for finer)
+GEOAPIFY_GEOMETRY=geometry_1000
 
 # OPTIONAL — alternate LLM providers (not required if GROQ_API_KEY is set)
 GEMINI_API_KEY=your_gemini_api_key_here

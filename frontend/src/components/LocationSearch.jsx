@@ -47,7 +47,8 @@ export default function LocationSearch({ onLocationSelect }) {
             borderRadius: '20px',
             border: '1px solid var(--border)',
             background: '#ffffff',
-            color: 'var(--text-primary)',
+            color: '#111111',
+            caretColor: '#111111',
             outline: 'none',
             fontSize: '0.9rem',
             boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.05)'
