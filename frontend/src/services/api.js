@@ -1,4 +1,5 @@
 const BASE = 'http://localhost:8000/api';
+export const API_BASE = BASE;
 
 export async function initializeLocation(name, lat, lon) {
   const r = await fetch(`${BASE}/locations`, {
@@ -9,8 +10,9 @@ export async function initializeLocation(name, lat, lon) {
   return r.json();
 }
 
-export async function getCurrentAqi(city = 'Delhi') {
-  const r = await fetch(`${BASE}/current_aqi?city_name=${city}`);
+export async function getCurrentAqi(city = 'Delhi', lat, lon) {
+  const coords = (lat != null && lon != null) ? `&lat=${lat}&lon=${lon}` : '';
+  const r = await fetch(`${BASE}/current_aqi?city_name=${encodeURIComponent(city)}${coords}`);
   return r.json();
 }
 
@@ -19,8 +21,9 @@ export async function getBoundary(city = 'Delhi') {
   return r.json();
 }
 
-export async function getForecasts(city = 'Delhi') {
-  const r = await fetch(`${BASE}/forecasts?city_name=${city}`);
+export async function getForecasts(city = 'Delhi', lat, lon) {
+  const coords = (lat != null && lon != null) ? `&lat=${lat}&lon=${lon}` : '';
+  const r = await fetch(`${BASE}/forecasts?city_name=${encodeURIComponent(city)}${coords}`);
   return r.json();
 }
 
@@ -42,6 +45,22 @@ export async function getAnomalies(city = 'Delhi') {
 export async function getAdvisories(city = 'Delhi') {
   const r = await fetch(`${BASE}/advisories?city_name=${city}`);
   return r.json();
+}
+
+export async function getHeatmap() {
+  const r = await fetch(`${BASE}/heatmap`);
+  if (!r.ok) return { points: [] };
+  return r.json();
+}
+
+export async function getHeatmapConfig() {
+  try {
+    const r = await fetch(`${BASE}/heatmap/config`);
+    if (!r.ok) return { provider: 'grid' };
+    return r.json();
+  } catch {
+    return { provider: 'grid' };
+  }
 }
 
 export async function getForecastAccuracy(city = 'Delhi') {

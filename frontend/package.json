@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "leaflet": "^1.9.4",
+    "leaflet.heat": "^0.2.0",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
     "recharts": "^3.9.2"

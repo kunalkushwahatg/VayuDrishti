@@ -14,14 +14,15 @@ export default function WardDetailPanel({ ward, cityName, onClose }) {
 
   useEffect(() => {
     setLoading(true);
-    Promise.all([getAttribution(cityName), getForecasts(cityName)]).then(([a, f]) => {
+    Promise.all([getAttribution(cityName), getForecasts(cityName, ward.lat, ward.lon)]).then(([a, f]) => {
       setAttr(a);
-      setForecasts([
-        { h: 'Now', aqi: ward.aqi },
-        { h: '+24h', aqi: f[0]?.aqi ?? 220 },
-        { h: '+48h', aqi: (f[0]?.aqi ?? 220) + 15 },
-        { h: '+72h', aqi: (f[0]?.aqi ?? 220) + 30 },
-      ]);
+      // Build the outlook curve from the real API forecast points (any horizons).
+      const now = ward.aqi ?? null;
+      const pts = (f || [])
+        .filter(x => x.horizon_hours > 0)
+        .sort((p, q) => p.horizon_hours - q.horizon_hours)
+        .map(x => ({ h: `+${x.horizon_hours}h`, aqi: Math.round(x.aqi) }));
+      setForecasts([{ h: 'Now', aqi: now }, ...pts].filter(d => d.aqi != null));
       setLoading(false);
     }).catch(() => setLoading(false));
     // Forecast skill loads independently (backfills real history, can take a few seconds)
@@ -141,7 +142,7 @@ export default function WardDetailPanel({ ward, cityName, onClose }) {
 
         {/* Confidence Badge */}
         {attr && !loading && (
-          <div style={{ background: 'var(--accent-light)', borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem', border: '1px solid #B2DDD2' }}>
+          <div style={{ background: 'var(--accent-light)', borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem', border: '1px solid var(--accent-glow)' }}>
             <div style={{ fontSize: '0.75rem', color: 'var(--accent)', fontWeight: 600 }}>Confidence</div>
             <div style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--accent)' }}>
               {Math.round((attr.confidence || 0.8) * 100)}%

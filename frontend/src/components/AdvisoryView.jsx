@@ -4,8 +4,8 @@ import SkeletonCard from './SkeletonCard';
 
 const CHANNEL_ICONS = { push: '📱', ivr: '📞', display: '🖥️' };
 const CHANNEL_LABELS = { push: 'SMS / App Push', ivr: 'IVR Voice Script', display: 'Billboard Display' };
-const CHANNEL_COLORS = { push: '#E8F3FF', ivr: '#F3E8FF', display: '#E8FFE8' };
-const CHANNEL_ACCENT = { push: '#2563EB', ivr: '#7C3AED', display: '#16A34A' };
+const CHANNEL_COLORS = { push: 'rgba(59,130,246,0.10)', ivr: 'rgba(139,92,246,0.10)', display: 'rgba(34,197,94,0.10)' };
+const CHANNEL_ACCENT = { push: '#60A5FA', ivr: '#A78BFA', display: '#4ADE80' };
 
 export default function AdvisoryView({ cityName }) {
   const [items, setItems] = useState([]);
