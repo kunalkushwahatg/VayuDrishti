@@ -1,0 +1,115 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1160 660" width="1160" height="660" font-family="Helvetica, Arial, sans-serif">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#5B6672"/>
+    </marker>
+    <marker id="arrowdash" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#14837A"/>
+    </marker>
+  </defs>
+
+  <rect x="0" y="0" width="1160" height="660" fill="#FFFFFF"/>
+
+  <!-- Title -->
+  <text x="580" y="40" text-anchor="middle" font-size="24" font-weight="bold" fill="#1A2530">VayuDrishti — Three-Tier Architecture</text>
+  <text x="580" y="64" text-anchor="middle" font-size="13" fill="#5B6672">Orchestrated by FastAPI · each layer independently swappable</text>
+
+  <!-- ============ SENSING LAYER ============ -->
+  <rect x="40" y="90" width="1000" height="120" rx="10" fill="#E6F4F0" stroke="#0F6E56" stroke-width="1.5"/>
+  <text x="60" y="115" font-size="12" font-weight="bold" fill="#0F6E56" letter-spacing="1.5">SENSING LAYER</text>
+
+  <rect x="62" y="128" width="222" height="62" rx="8" fill="#FFFFFF" stroke="#D8DEE4"/>
+  <text x="173" y="152" text-anchor="middle" font-size="13" font-weight="bold" fill="#1A2530">Google Air Quality</text>
+  <text x="173" y="172" text-anchor="middle" font-size="11" fill="#5B6672">current · 96h forecast · tiles</text>
+
+  <rect x="300" y="128" width="222" height="62" rx="8" fill="#FFFFFF" stroke="#D8DEE4"/>
+  <text x="411" y="152" text-anchor="middle" font-size="13" font-weight="bold" fill="#1A2530">NASA FIRMS · VIIRS</text>
+  <text x="411" y="172" text-anchor="middle" font-size="11" fill="#5B6672">satellite active-fire detection</text>
+
+  <rect x="538" y="128" width="222" height="62" rx="8" fill="#FFFFFF" stroke="#D8DEE4"/>
+  <text x="649" y="152" text-anchor="middle" font-size="13" font-weight="bold" fill="#1A2530">Open-Meteo</text>
+  <text x="649" y="172" text-anchor="middle" font-size="11" fill="#5B6672">weather · AQ · history backfill</text>
+
+  <rect x="776" y="128" width="222" height="62" rx="8" fill="#FFFFFF" stroke="#D8DEE4"/>
+  <text x="887" y="152" text-anchor="middle" font-size="13" font-weight="bold" fill="#1A2530">OSM · Overpass</text>
+  <text x="887" y="172" text-anchor="middle" font-size="11" fill="#5B6672">Geoapify · emission sites</text>
+
+  <!-- arrow down -->
+  <line x1="540" y1="212" x2="540" y2="258" stroke="#5B6672" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="552" y="240" font-size="11" fill="#5B6672">ingest + freshness guard</text>
+
+  <!-- ============ INTELLIGENCE LAYER ============ -->
+  <rect x="40" y="262" width="1000" height="150" rx="10" fill="#E6F4F0" stroke="#0F6E56" stroke-width="1.5"/>
+  <text x="60" y="287" font-size="12" font-weight="bold" fill="#0F6E56" letter-spacing="1.5">INTELLIGENCE LAYER · 7 COOPERATING AGENTS</text>
+  <text x="1020" y="287" text-anchor="end" font-size="11" font-style="italic" fill="#14837A">math computes · the LLM communicates</text>
+
+  <rect x="62" y="300" width="130" height="60" rx="8" fill="#FFFFFF" stroke="#D8DEE4"/>
+  <text x="127" y="322" text-anchor="middle" font-size="11" font-weight="bold" fill="#0F6E56">1 · Attribution</text>
+  <text x="127" y="340" text-anchor="middle" font-size="10" fill="#5B6672">source split %</text>
+
+  <rect x="200" y="300" width="130" height="60" rx="8" fill="#FFFFFF" stroke="#D8DEE4"/>
+  <text x="265" y="322" text-anchor="middle" font-size="11" font-weight="bold" fill="#0F6E56">2 · Forecast</text>
+  <text x="265" y="340" text-anchor="middle" font-size="10" fill="#5B6672">24/48/72h AQI</text>
+
+  <rect x="338" y="300" width="130" height="60" rx="8" fill="#FFFFFF" stroke="#D8DEE4"/>
+  <text x="403" y="322" text-anchor="middle" font-size="11" font-weight="bold" fill="#0F6E56">3 · Enforcement</text>
+  <text x="403" y="340" text-anchor="middle" font-size="10" fill="#5B6672">priority worklist</text>
+
+  <rect x="476" y="300" width="130" height="60" rx="8" fill="#FFFFFF" stroke="#D8DEE4"/>
+  <text x="541" y="322" text-anchor="middle" font-size="11" font-weight="bold" fill="#0F6E56">4 · Comparative</text>
+  <text x="541" y="340" text-anchor="middle" font-size="10" fill="#5B6672">policy transfer</text>
+
+  <rect x="614" y="300" width="130" height="60" rx="8" fill="#FFFFFF" stroke="#D8DEE4"/>
+  <text x="679" y="322" text-anchor="middle" font-size="11" font-weight="bold" fill="#0F6E56">5 · Advisory</text>
+  <text x="679" y="340" text-anchor="middle" font-size="10" fill="#5B6672">7 languages</text>
+
+  <rect x="752" y="300" width="130" height="60" rx="8" fill="#FFFFFF" stroke="#D8DEE4"/>
+  <text x="817" y="322" text-anchor="middle" font-size="11" font-weight="bold" fill="#0F6E56">6 · Anomaly</text>
+  <text x="817" y="340" text-anchor="middle" font-size="10" fill="#5B6672">spike + satellite</text>
+
+  <rect x="890" y="300" width="130" height="60" rx="8" fill="#FFFFFF" stroke="#D8DEE4"/>
+  <text x="955" y="322" text-anchor="middle" font-size="11" font-weight="bold" fill="#0F6E56">7 · Ask-AI</text>
+  <text x="955" y="340" text-anchor="middle" font-size="10" fill="#5B6672">RAG over 1/2/3/6</text>
+
+  <rect x="62" y="370" width="958" height="30" rx="6" fill="#0F6E56"/>
+  <text x="541" y="390" text-anchor="middle" font-size="12" font-weight="bold" fill="#FFFFFF">FastAPI orchestration · SQLAlchemy · background pipeline · Groq llama-3.3-70b-versatile</text>
+
+  <!-- arrow down -->
+  <line x1="540" y1="414" x2="540" y2="460" stroke="#5B6672" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="552" y="442" font-size="11" fill="#5B6672">evidence + confidence scores</text>
+
+  <!-- ============ ACTION LAYER ============ -->
+  <rect x="40" y="464" width="1000" height="120" rx="10" fill="#E6F4F0" stroke="#0F6E56" stroke-width="1.5"/>
+  <text x="60" y="489" font-size="12" font-weight="bold" fill="#0F6E56" letter-spacing="1.5">ACTION LAYER · REACT + LEAFLET COMMAND CENTRE</text>
+
+  <rect x="62" y="502" width="150" height="62" rx="8" fill="#FFFFFF" stroke="#D8DEE4"/>
+  <text x="137" y="527" text-anchor="middle" font-size="12" font-weight="bold" fill="#1A2530">Geospatial Map</text>
+  <text x="137" y="546" text-anchor="middle" font-size="10" fill="#5B6672">city boundaries</text>
+
+  <rect x="222" y="502" width="150" height="62" rx="8" fill="#FFFFFF" stroke="#D8DEE4"/>
+  <text x="297" y="527" text-anchor="middle" font-size="12" font-weight="bold" fill="#1A2530">India Heatmap</text>
+  <text x="297" y="546" text-anchor="middle" font-size="10" fill="#5B6672">nationwide AQI field</text>
+
+  <rect x="382" y="502" width="150" height="62" rx="8" fill="#FFFFFF" stroke="#D8DEE4"/>
+  <text x="457" y="527" text-anchor="middle" font-size="12" font-weight="bold" fill="#1A2530">Inspections</text>
+  <text x="457" y="546" text-anchor="middle" font-size="10" fill="#5B6672">dispatch worklist</text>
+
+  <rect x="542" y="502" width="150" height="62" rx="8" fill="#FFFFFF" stroke="#D8DEE4"/>
+  <text x="617" y="527" text-anchor="middle" font-size="12" font-weight="bold" fill="#1A2530">Spike Alerts</text>
+  <text x="617" y="546" text-anchor="middle" font-size="10" fill="#5B6672">investigation reports</text>
+
+  <rect x="702" y="502" width="150" height="62" rx="8" fill="#FFFFFF" stroke="#D8DEE4"/>
+  <text x="777" y="527" text-anchor="middle" font-size="12" font-weight="bold" fill="#1A2530">Ask-AI Chat</text>
+  <text x="777" y="546" text-anchor="middle" font-size="10" fill="#5B6672">natural language</text>
+
+  <rect x="862" y="502" width="150" height="62" rx="8" fill="#FFFFFF" stroke="#D8DEE4"/>
+  <text x="937" y="527" text-anchor="middle" font-size="12" font-weight="bold" fill="#1A2530">Advisories</text>
+  <text x="937" y="546" text-anchor="middle" font-size="10" fill="#5B6672">regional languages</text>
+
+  <!-- feedback loop -->
+  <path d="M 1046 524 L 1105 524 L 1105 160 L 1046 160" fill="none" stroke="#14837A" stroke-width="1.8" stroke-dasharray="6,5" marker-end="url(#arrowdash)"/>
+  <text x="1118" y="348" font-size="11" fill="#14837A" transform="rotate(-90 1118 348)" text-anchor="middle">feedback loop · actions re-observed</text>
+
+  <text x="580" y="618" text-anchor="middle" font-size="11" fill="#5B6672">Every premium source degrades gracefully to a free fallback — the system always runs.</text>
+  <text x="580" y="640" text-anchor="middle" font-size="11" font-weight="bold" fill="#0F6E56">Team Nimbu · NIT Rourkela</text>
+</svg>
